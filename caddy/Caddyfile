@@ -28,3 +28,8 @@ status.infra.test {
     import local_tls
     reverse_proxy uptime-kuma:3001
 }
+
+metrics.infra.test {
+    import local_tls
+    reverse_proxy grafana:3000
+}
