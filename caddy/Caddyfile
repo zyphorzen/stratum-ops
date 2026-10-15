@@ -1,0 +1,11 @@
+http://app.infra.test {
+    reverse_proxy whoami:80
+}
+
+http://logs.infra.test {
+    reverse_proxy dozzle:8080
+}
+
+http://status.infra.test {
+    reverse_proxy uptime-kuma:3001
+}

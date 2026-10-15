@@ -1,0 +1,74 @@
+services:
+  reverse-proxy:
+    image: caddy:2-alpine
+    container_name: stratum_proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      BASE_DOMAIN: ${BASE_DOMAIN:-infra.test}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    networks:
+      - frontend_net
+
+  whoami:
+    image: traefik/whoami
+    container_name: stratum_app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - frontend_net
+      - backend_net
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: stratum_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - backend_net
+
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: stratum_logs
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - frontend_net
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: stratum_status
+    restart: unless-stopped
+    volumes:
+      - kuma_data:/app/data
+    networks:
+      - frontend_net
+      - backend_net
+
+networks:
+  frontend_net:
+    driver: bridge
+  backend_net:
+    driver: bridge
+    internal: true
+
+volumes:
+  caddy_data:
+  pg_data:
+  kuma_data:

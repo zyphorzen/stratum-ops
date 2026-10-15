@@ -1,0 +1,16 @@
+.env
+*.env.local
+*.pem
+*.key
+*.crt
+
+*.sql
+*.sql.gz
+*.dump
+backups/
+
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
