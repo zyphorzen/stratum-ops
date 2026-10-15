@@ -1,11 +1,30 @@
-http://app.infra.test {
+(local_tls) {
+    tls internal
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+}
+
+(auth_guard) {
+    basic_auth {
+        {$CADDY_AUTH_USER} {$CADDY_AUTH_HASH}
+    }
+}
+
+app.infra.test {
+    import local_tls
     reverse_proxy whoami:80
 }
 
-http://logs.infra.test {
+logs.infra.test {
+    import local_tls
+    import auth_guard
     reverse_proxy dozzle:8080
 }
 
-http://status.infra.test {
+status.infra.test {
+    import local_tls
     reverse_proxy uptime-kuma:3001
 }

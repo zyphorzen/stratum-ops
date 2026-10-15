@@ -5,6 +5,10 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    env_file:
+      - .env
     environment:
       BASE_DOMAIN: ${BASE_DOMAIN:-infra.test}
     volumes:
